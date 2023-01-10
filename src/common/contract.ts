@@ -162,6 +162,9 @@ export interface MessageData {
 }
 
 export const ParseMessageText = (message: MessageData): string => {
+  if (message.type === "service") {
+    return message.action || "";
+  }
   // Prepare text
   let content = "";
   for (const entity of message.text_entities) {

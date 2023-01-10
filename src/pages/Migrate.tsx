@@ -241,8 +241,7 @@ const Migrate = () => {
                       primary={
                         <Box sx={{ display: "flex", flexDirection: "column" }}>
                           <span>
-                            {ParseMessageText(wrappedMessage.message) ||
-                              wrappedMessage.message.action}
+                            {ParseMessageText(wrappedMessage.message)}
                           </span>
                           {/*Photo*/}
                           {wrappedMessage.message.photo && (
