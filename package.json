@@ -9,7 +9,7 @@
     "@mui/material": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "crossbell.js": "^0.14.1",
+    "crossbell.js": "^0.16.1",
     "ethers": "^5.7.2",
     "react": "latest",
     "react-dom": "latest",
