@@ -1,6 +1,6 @@
 {
   "name": "telegram2crossbell",
-  "version": "0.1.2",
+  "version": "0.1.0",
   "private": false,
   "dependencies": {
     "@emotion/react": "latest",
