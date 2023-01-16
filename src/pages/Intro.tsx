@@ -1,9 +1,20 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 const Intro = () => {
   const nav = useNavigate();
+
+  const schemaCheck = useCallback(() => {
+    const schema = window.location.protocol;
+    if (schema !== "http:" && schema !== "https:") {
+      nav("/error");
+    }
+  }, [nav]);
+
+  useEffect(() => {
+    schemaCheck();
+  }, []);
 
   return (
     <Box

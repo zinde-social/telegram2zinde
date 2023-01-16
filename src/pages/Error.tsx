@@ -21,7 +21,11 @@ const Error = () => {
       >
         <Typography>
           It seems we cannot detect necessary data. <br />
-          Please put these files into your Telegram exported data's directory.
+          Please put these files into your Telegram exported data's directory.{" "}
+          <br />
+          Or maybe this site is opened directly? In that case it won't work,{" "}
+          <br />
+          please use a http server.
         </Typography>
       </Box>
     </Box>
