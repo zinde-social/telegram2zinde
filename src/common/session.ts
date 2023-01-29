@@ -1,5 +1,6 @@
 export interface Setting {
   includeService: boolean;
+  aggregatedByTsp: boolean;
   characterHandle: string;
 }
 
@@ -20,6 +21,7 @@ const initSetting = () => {
     // Initialize
     currentSetting = {
       includeService: false,
+      aggregatedByTsp: false,
       characterHandle: "",
     };
     localStorage.setItem(settingKey, JSON.stringify(currentSetting));

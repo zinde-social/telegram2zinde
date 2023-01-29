@@ -16,9 +16,10 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  MessageData,
+  TGExportMessageData,
   ParseMessageText,
   signerPostNote,
+  TGExportMessageDataWithPhotos,
 } from "@/common/contract";
 import Loading from "@/components/Loading";
 import { getProgress, getSetting, setProgress } from "@/common/session";
@@ -27,7 +28,7 @@ import { useNavigate } from "react-router-dom";
 
 interface messagesPendingMigration {
   // Original message data
-  message: MessageData;
+  message: TGExportMessageDataWithPhotos;
 
   // Let user select this
   isToMigrate: boolean;
@@ -55,15 +56,66 @@ const Migrate = () => {
 
     // Get settings
     const settings = getSetting();
-
     try {
       // Load file
       const results = await fetch("result.json").then((res) => res.json());
-
       const currentProgress = getProgress();
 
-      const parsedMessages = results.messages.map(
-        (msg: MessageData): messagesPendingMigration => {
+      const msgs = results.messages as TGExportMessageData[];
+      let msgsWithPhotos = [] as TGExportMessageDataWithPhotos[];
+      if (settings.aggregatedByTsp) {
+        let lastMsg: TGExportMessageDataWithPhotos = msgs[0];
+        let lastTsp = +msgs[0].date_unixtime;
+
+        for (const msg of msgs.slice(1)) {
+          const msgPhoto = {
+            photo: msg.photo,
+            width: msg.width,
+            height: msg.height,
+          };
+          // If tsps of messages are less than 5, and only one of them contains text, they are regarded as one note
+          if (
+            Math.abs(+msg.date_unixtime - lastTsp) < 5 &&
+            msg.photo &&
+            (msg.text === "" || lastMsg.text === "")
+          ) {
+            if (!lastMsg.photos) {
+              lastMsg.photos = [msgPhoto];
+            } else {
+              lastMsg.photos.push(msgPhoto);
+            }
+            if (!lastMsg.text) {
+              lastMsg.text = msg.text;
+              lastMsg.text_entities = msg.text_entities;
+            }
+          } else {
+            msgsWithPhotos.push(lastMsg);
+            lastMsg = msg.photo
+              ? {
+                  photos: [msgPhoto],
+                  ...msg,
+                }
+              : msg;
+          }
+          lastTsp = +msg.date_unixtime;
+        }
+        msgsWithPhotos.push(lastMsg);
+      } else {
+        msgsWithPhotos = msgs.map((msg) => {
+          const msgPhoto = {
+            photo: msg.photo,
+            width: msg.width,
+            height: msg.height,
+          };
+          return {
+            photos: [msgPhoto],
+            ...msg,
+          };
+        });
+      }
+
+      const parsedMessages = msgsWithPhotos.map(
+        (msg: TGExportMessageDataWithPhotos): messagesPendingMigration => {
           const isService = msg.type === "service";
           const isMigrated = currentProgress.finishedIDs.includes(msg.id);
           return {
@@ -244,13 +296,18 @@ const Migrate = () => {
                             {ParseMessageText(wrappedMessage.message)}
                           </span>
                           {/*Photo*/}
-                          {wrappedMessage.message.photo && (
-                            <img
-                              src={wrappedMessage.message.photo}
-                              alt={wrappedMessage.message.photo}
-                              width={300}
-                            />
-                          )}
+                          {wrappedMessage.message.photos &&
+                            wrappedMessage.message.photos.map((photo) => (
+                              <img
+                                key={
+                                  wrappedMessage.message.id.toString() +
+                                  photo.photo
+                                }
+                                src={photo.photo}
+                                alt={photo.photo}
+                                width={300}
+                              />
+                            ))}
                           {/*Attachment*/}
                           {wrappedMessage.message.file &&
                             (wrappedMessage.message.mime_type?.startsWith(

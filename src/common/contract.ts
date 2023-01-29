@@ -2,6 +2,7 @@ import { Contract, NoteMetadataAttachmentBase } from "crossbell.js";
 import type { NoteMetadata } from "crossbell.js";
 import { ethers } from "ethers";
 import { uploadFile, uploadJson } from "./ipfs";
+import { Photo } from "@mui/icons-material";
 
 let gContract: Contract | null = null;
 let signerAddress: string = "";
@@ -133,7 +134,18 @@ export interface TextEntity {
   href?: string; // Only type === link
 }
 
-export interface MessageData {
+interface Photo {
+  photo?: string;
+  width?: number;
+  height?: number;
+}
+
+interface Text {
+  text: string | (string | TextEntity)[];
+  text_entities: TextEntity[];
+}
+
+interface TGExportMessageDataWithoutPhoto extends Text {
   id: number;
   type: string; // service / message
   date: string;
@@ -146,22 +158,27 @@ export interface MessageData {
   from?: string;
   from_id?: string;
 
-  photo?: string;
-  width?: number;
-  height?: number;
-
   file?: string;
   thumbnail?: string;
   mime_type?: string;
 
+  width?: number;
+  height?: number;
+
   media_type?: string; // video_file / voice_message
   duration_seconds?: number;
-
-  text: string | (string | TextEntity)[];
-  text_entities: TextEntity[];
 }
 
-export const ParseMessageText = (message: MessageData): string => {
+export interface TGExportMessageData
+  extends TGExportMessageDataWithoutPhoto,
+    Photo {}
+
+export interface TGExportMessageDataWithPhotos
+  extends TGExportMessageDataWithoutPhoto {
+  photos?: Photo[];
+}
+
+export const ParseMessageText = (message: TGExportMessageData): string => {
   if (message.type === "service") {
     return message.action || "";
   }
@@ -196,28 +213,33 @@ export const ParseMessageText = (message: MessageData): string => {
   return content;
 };
 
-export const signerPostNote = async (message: MessageData) => {
+export const signerPostNote = async (
+  message: TGExportMessageDataWithPhotos
+) => {
   if (gContract === null) {
     throw new Error("Contract not initialized.");
   }
 
   // Upload medias to IPFS
   const mediaAttachments: NoteMetadataAttachmentBase<"address">[] = [];
-  if (!!message.photo) {
+  if (!!message.photos) {
     // Is photo
-    const mediaFileName = `${message.photo.split("/").pop()}`;
-    const result = await fetch(message.photo);
-    const blob = await result.blob();
-    const ipfsUri = await uploadFile(blob);
-    mediaAttachments.push({
-      name: mediaFileName,
-      address: ipfsUri,
-      mime_type: blob.type,
-      size_in_bytes: blob.size,
-      alt: mediaFileName,
-      width: message.width,
-      height: message.height,
-    });
+    for (const photo of message.photos) {
+      if (!photo.photo) break;
+      const mediaFileName = `${photo.photo.split("/").pop()}`;
+      const result = await fetch(photo.photo);
+      const blob = await result.blob();
+      const ipfsUri = await uploadFile(blob);
+      mediaAttachments.push({
+        name: mediaFileName,
+        address: ipfsUri,
+        mime_type: blob.type,
+        size_in_bytes: blob.size,
+        alt: mediaFileName,
+        width: photo.width,
+        height: photo.height,
+      });
+    }
   }
 
   if (!!message.file) {
@@ -243,6 +265,7 @@ export const signerPostNote = async (message: MessageData) => {
     sources: ["T2C", "Telegram"],
     content: ParseMessageText(message),
     attachments: mediaAttachments,
+    date_published: message.date,
   };
 
   const noteIPFSUri = await uploadJson(note);

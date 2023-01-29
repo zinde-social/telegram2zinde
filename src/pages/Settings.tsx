@@ -39,6 +39,7 @@ const Settings = () => {
   const [privateKey, setPrivateKey] = useState("");
   const [characterHandle, setCharacterHandle] = useState("");
   const [isIncludeService, setIncludeService] = useState(false);
+  const [isAggregatedByTsp, setAggregatedByTsp] = useState(false);
 
   const [isShowingError, setShowingError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -252,6 +253,20 @@ const Settings = () => {
               label="Include service notifications"
             />
           </Grid>
+          <Grid>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isAggregatedByTsp}
+                  onChange={(ev) => {
+                    setAggregatedByTsp(ev.target.checked);
+                  }}
+                  color="primary"
+                />
+              }
+              label="Aggregate photos by timestamp (experimental feature)"
+            />
+          </Grid>
           <Button
             type="button"
             fullWidth
@@ -265,6 +280,7 @@ const Settings = () => {
               setSetting({
                 characterHandle,
                 includeService: isIncludeService,
+                aggregatedByTsp: isAggregatedByTsp,
               });
 
               try {
