@@ -2,6 +2,7 @@ export interface Setting {
   includeService: boolean;
   aggregatedByTsp: boolean;
   characterHandle: string;
+  channelName: string;
 }
 
 export interface Progress {
@@ -23,6 +24,7 @@ const initSetting = () => {
       includeService: false,
       aggregatedByTsp: false,
       characterHandle: "",
+      channelName: "",
     };
     localStorage.setItem(settingKey, JSON.stringify(currentSetting));
   }

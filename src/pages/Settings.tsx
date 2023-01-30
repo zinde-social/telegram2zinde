@@ -38,6 +38,7 @@ const Settings = () => {
 
   const [privateKey, setPrivateKey] = useState("");
   const [characterHandle, setCharacterHandle] = useState("");
+  const [channelName, setChannelName] = useState("");
   const [isIncludeService, setIncludeService] = useState(false);
   const [isAggregatedByTsp, setAggregatedByTsp] = useState(false);
 
@@ -56,6 +57,7 @@ const Settings = () => {
     console.log(setting);
 
     setCharacterHandle(setting.characterHandle);
+    setChannelName(setting.channelName);
     setIncludeService(setting.includeService);
   }, []);
 
@@ -238,6 +240,20 @@ const Settings = () => {
                 setCharacterHandle(ev.target.value);
               }}
             />
+            <TextField
+              margin="normal"
+              fullWidth
+              name="channelName"
+              label="Telegram Channel username or invite link"
+              type="text"
+              placeholder="Invite link would be automatically converted"
+              value={channelName}
+              onChange={(ev) => {
+                setChannelName(
+                  ev.target.value.replace("https://", "").replace("t.me/", "")
+                );
+              }}
+            />
           </Grid>
           <Grid>
             <FormControlLabel
@@ -281,6 +297,7 @@ const Settings = () => {
                 characterHandle,
                 includeService: isIncludeService,
                 aggregatedByTsp: isAggregatedByTsp,
+                channelName: channelName,
               });
 
               try {

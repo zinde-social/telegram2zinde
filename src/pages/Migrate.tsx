@@ -200,6 +200,8 @@ const Migrate = () => {
               setLoading(true);
               setLoadingMessage("Initializing basic information...");
 
+              const settings = getSetting();
+
               setProgress({
                 ...getProgress(),
                 finishedIDs: [],
@@ -223,7 +225,10 @@ const Migrate = () => {
                         ])
                         .concat(messages.slice(index + 1, messages.length))
                     );
-                    await signerPostNote(wrappedMessage.message);
+                    await signerPostNote(
+                      wrappedMessage.message,
+                      settings.channelName
+                    );
                     const progress = getProgress();
                     setProgress({
                       ...progress,

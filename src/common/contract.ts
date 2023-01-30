@@ -214,7 +214,8 @@ export const ParseMessageText = (message: TGExportMessageData): string => {
 };
 
 export const signerPostNote = async (
-  message: TGExportMessageDataWithPhotos
+  message: TGExportMessageDataWithPhotos,
+  channelName: string
 ) => {
   if (gContract === null) {
     throw new Error("Contract not initialized.");
@@ -266,6 +267,9 @@ export const signerPostNote = async (
     content: ParseMessageText(message),
     attachments: mediaAttachments,
     date_published: new Date(message.date).toISOString(),
+    external_urls: channelName
+      ? [`https://t.me/${channelName}/${message.id}`]
+      : [],
   };
 
   const noteIPFSUri = await uploadJson(note);
