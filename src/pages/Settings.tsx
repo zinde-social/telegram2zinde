@@ -297,7 +297,7 @@ const Settings = () => {
                 const signerCSBBalance =
                   (await getSignerBalance()) / Math.pow(10, 18);
                 console.log("Signer's CSB: ", signerCSBBalance);
-                if (signerCSBBalance > 0) {
+                if (signerCSBBalance > 0.01) {
                   // Check operator
                   if (await checkOperator()) {
                     // Finally
