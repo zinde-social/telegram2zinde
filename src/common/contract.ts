@@ -265,7 +265,7 @@ export const signerPostNote = async (
     sources: ["T2C", "Telegram"],
     content: ParseMessageText(message),
     attachments: mediaAttachments,
-    date_published: message.date,
+    date_published: new Date(message.date).toISOString(),
   };
 
   const noteIPFSUri = await uploadJson(note);
